@@ -1,0 +1,44 @@
+// Device tree overlay for I2C RTC connected rx8804
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "brcm,bcm2708";
+
+	fragment@0 {
+		target = <&gpio>;
+		__overlay__ {
+			rx8804_pins: rx8804_pins {
+				brcm,pins = <27>; 
+				brcm,function = <0>; 
+				brcm,pull = <2>; 
+			};
+		};
+	};
+
+	fragment@1 {
+		target = <&i2c1>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "okay";
+
+			rx8804: rx8804@32 {
+				compatible = "epson,rx8804";
+				reg = <0x32>;
+				pinctrl-names = "default";
+				pinctrl-0 = <&rx8804_pins>;
+				interrupt-parent = <&gpio>;
+				interrupts = <27 2>; 
+				irq-gpios = <&gpio 27 0>; 
+			};
+		};
+	};
+
+	__overrides__ {
+		interrupt = <&rx8804_pins>,"brcm,pins:0",
+			<&rx8804>,"interrupts:0",
+			<&rx8804>,"irq-gpios:27";
+	};
+};
+
